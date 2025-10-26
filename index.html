@@ -54,6 +54,21 @@
       border-radius:6px;background:#28a745;color:#fff;
       font-weight:bold;cursor:pointer;
     }
+
+    /* 📱 Version téléphone */
+    @media (max-width: 600px) {
+      #game {
+        width: 90vw;
+        height: 80vh;
+      }
+      #car, .enemy {
+        width: 10vw;
+        height: 20vh;
+      }
+      .roadLine {
+        left: 45%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -62,7 +77,7 @@
     <div id="startScreen">
       <h2>🚗 Jeu de Course</h2>
       <p>Évite les voitures jaunes !<br>
-      Utilise les flèches ← et → pour te déplacer.</p>
+      Utilise les flèches ← et → ou touche l’écran pour te déplacer.</p>
       <button id="startBtn">Démarrer</button>
     </div>
   </div>
@@ -88,12 +103,10 @@
       keys = {ArrowLeft:false, ArrowRight:false};
       gameActive = true;
 
-      // Créer le joueur
       const car = document.createElement("div");
       car.setAttribute("id","car");
       game.appendChild(car);
 
-      // Lignes de route
       for(let i=0;i<6;i++){
         const line = document.createElement("div");
         line.classList.add("roadLine");
@@ -101,7 +114,6 @@
         game.appendChild(line);
       }
 
-      // Ennemis
       for(let i=0;i<3;i++){
         let enemy = document.createElement("div");
         enemy.classList.add("enemy");
@@ -150,7 +162,6 @@
         }
         enemy.style.top = (top+player.speed)+"px";
 
-        // Collision
         if(checkCollision(car, enemy)){
           gameOver();
         }
@@ -170,14 +181,45 @@
 
     function gameOver(){
       gameActive = false;
-      startScreen.style.display = "flex";
-      startScreen.innerHTML = `
-        <h2>💥 Crash !</h2>
-        <p>Score final : ${player.score}</p>
-        <button id="restartBtn">Rejouer</button>
-      `;
-      document.getElementById("restartBtn").onclick = startGame;
+
+      // 💥 Flash blanc rapide
+      const flash = document.createElement("div");
+      flash.style.position = "absolute";
+      flash.style.top = 0;
+      flash.style.left = 0;
+      flash.style.width = "100%";
+      flash.style.height = "100%";
+      flash.style.background = "white";
+      flash.style.opacity = "0.8";
+      flash.style.transition = "opacity 0.3s";
+      game.appendChild(flash);
+
+      setTimeout(() => { flash.style.opacity = "0"; }, 100);
+
+      setTimeout(() => {
+        flash.remove();
+        startScreen.style.display = "flex";
+        startScreen.innerHTML = `
+          <h2>💥 Crash !</h2>
+          <p>Score final : ${player.score}</p>
+          <button id="restartBtn">Rejouer</button>
+        `;
+        document.getElementById("restartBtn").onclick = startGame;
+      }, 300);
     }
+
+    // 📱 Contrôle tactile (mobile)
+    game.addEventListener("touchstart", e => {
+      const touchX = e.touches[0].clientX;
+      const rect = game.getBoundingClientRect();
+      const mid = rect.left + rect.width / 2;
+
+      if (touchX < mid) {
+        player.x -= player.speed * 3;
+      } else {
+        player.x += player.speed * 3;
+      }
+    });
   </script>
 </body>
 </html>
